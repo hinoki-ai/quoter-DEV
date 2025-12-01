@@ -148,3 +148,104 @@ export const deleteQuote = mutation({
     await ctx.db.delete(args.quoteId);
   },
 });
+
+// Create a complete quote with all default data
+export const createCompleteQuote = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const now = Date.now();
+
+    // Create the main quote
+    const quoteId = await ctx.db.insert("quotes", {
+      clientName: "Sra. Lorena Paris Briones",
+      clientRut: "9.014.976-8",
+      projectTitle: "Proyecto Graciela - Finalización Aumento Potencia",
+      projectDescription: "Finalización de aumento de potencia, recableado de circuitos (luces y enchufes), revisión del segundo piso y obras civiles asociadas. Todos los valores incluyen materiales.",
+      scope: "El alcance se limita a la instalación de subalimentadores (troncales), separación de circuitos y reparación de fallas críticas. No incluye cambio de cableado en todos los enchufes, excepto en la habitación principal.",
+      recommendation: "Opción B",
+      recommendationReason: "Para dejar líneas matrices de ambos pisos en norma y operativas.",
+      notes: "La renovación total de la casa requiere una cotización nueva.",
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    // Add line items
+    const lineItemsData = [
+      {
+        title: "Cambio de switch/conmutador",
+        description: "Suministro e instalación de conmutador en tablero de 42 A para conexión de generador.",
+        value: "$100.000",
+        order: 0,
+      },
+      {
+        title: "Preparación de pisos y obras civiles",
+        description: "Recuperación de baldosas, visitas técnicas (Sodimac y vendedor de piedra laja) y asesoría.",
+        value: "$70.000",
+        order: 1,
+      },
+      {
+        title: "Recableado de circuitos (norma SEC)",
+        description: "Instalación de dos subalimentadores y división de ramales para separar enchufes y luces.",
+        materials: "Cable EVA Nexans (2.5 mm / 1.5 mm), tierra de protección y canaletas Legrand.",
+        order: 2,
+      },
+      {
+        title: "Recableado habitación principal y baño",
+        description: "Reinstalación de 4 enchufes y 1 luminaria. Definición del color de línea al momento de compra.",
+        order: 3,
+      },
+      {
+        title: "Inspección y reparación 2.º piso",
+        description: "Revisión y arreglo de falla eléctrica.",
+        value: "$50.000",
+        note: "Se descuenta si se elige recableado completo – Opción B",
+        conditional: true,
+        order: 4,
+      },
+    ];
+
+    const lineItemIds = await Promise.all(
+      lineItemsData.map(item =>
+        ctx.db.insert("lineItems", {
+          quoteId,
+          ...item,
+        })
+      )
+    );
+
+    // Add options for specific line items
+    const circuitosLineItemId = lineItemIds[2]; // Recableado de circuitos
+    await Promise.all([
+      ctx.db.insert("lineItemOptions", {
+        lineItemId: circuitosLineItemId,
+        label: "Primer piso",
+        value: "$650.000",
+        order: 0,
+      }),
+      ctx.db.insert("lineItemOptions", {
+        lineItemId: circuitosLineItemId,
+        label: "Ambos pisos",
+        value: "$850.000",
+        order: 1,
+      }),
+    ]);
+
+    const habitacionLineItemId = lineItemIds[3]; // Recableado habitación
+    await Promise.all([
+      ctx.db.insert("lineItemOptions", {
+        lineItemId: habitacionLineItemId,
+        label: "Solo habitación",
+        value: "$190.000",
+        order: 0,
+      }),
+      ctx.db.insert("lineItemOptions", {
+        lineItemId: habitacionLineItemId,
+        label: "Habitación + baño",
+        value: "$250.000",
+        order: 1,
+      }),
+    ]);
+
+    return quoteId;
+  },
+});

@@ -1,5 +1,12 @@
+"use client";
+
+import { useCurrentQuote } from "@/hooks/use-current-quote"
+
 export function PartidasTable() {
-  const partidas = [
+  const { currentQuote, isLoading } = useCurrentQuote();
+
+  // Default/fallback line items when no quote is loaded
+  const defaultPartidas = [
     {
       id: 1,
       title: "Cambio de switch/conmutador",
@@ -39,7 +46,36 @@ export function PartidasTable() {
       note: "Se descuenta si se elige recableado completo – Opción B",
       conditional: true,
     },
-  ]
+  ];
+
+  const lineItems = currentQuote?.lineItems || defaultPartidas.map((item, index) => ({
+    ...item,
+    options: item.subItems || [],
+    _id: `default-${item.id}`,
+    quoteId: "default",
+    order: index,
+  }));
+
+  if (isLoading) {
+    return (
+      <section>
+        <h3 className="text-xs uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
+          <span className="w-8 h-px bg-border"></span>
+          Detalle de Partidas y Costos
+        </h3>
+        <div className="animate-pulse">
+          <div className="border border-border rounded-md overflow-hidden">
+            <div className="h-12 bg-secondary"></div>
+            <div className="space-y-4 p-4">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="h-20 bg-secondary rounded"></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section>
@@ -64,11 +100,11 @@ export function PartidasTable() {
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {partidas.map((partida) => (
-              <tr key={partida.id} className="group">
+            {lineItems.map((partida, index) => (
+              <tr key={partida._id || partida.id} className="group">
                 <td className="px-4 py-4 align-top">
                   <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-secondary text-sm font-medium text-foreground">
-                    {partida.id}
+                    {partida.id || index + 1}
                   </span>
                 </td>
                 <td className="px-4 py-4">
@@ -79,9 +115,9 @@ export function PartidasTable() {
                       <span className="font-medium text-foreground/80">Materiales:</span> {partida.materials}
                     </p>
                   )}
-                  {partida.subItems && (
+                  {partida.options && partida.options.length > 0 && (
                     <div className="mt-3 space-y-1.5">
-                      {partida.subItems.map((item, idx) => (
+                      {partida.options.map((item, idx) => (
                         <div
                           key={idx}
                           className="flex items-center justify-between text-sm bg-secondary/50 rounded px-3 py-2"

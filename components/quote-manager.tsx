@@ -12,43 +12,51 @@ import { Save, FolderOpen, Plus } from "lucide-react";
 
 export function QuoteManager() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isLoadDialogOpen, setIsLoadDialogOpen] = useState(false);
   const [newQuoteName, setNewQuoteName] = useState("");
 
   // Convex hooks
   const quotes = useQuery(api.quotes.getAllQuotes);
   const createQuote = useMutation(api.quotes.createQuote);
-  const saveCurrentQuote = useMutation(api.quotes.createQuote);
+  const createCompleteQuote = useMutation(api.quotes.createCompleteQuote);
+  const { setCurrentQuoteId } = useCurrentQuote();
 
   const handleCreateQuote = async () => {
     if (!newQuoteName.trim()) return;
 
-    // This would save the current hardcoded data as a new quote
-    await createQuote({
-      clientName: "Sra. Lorena Paris Briones",
-      clientRut: "9.014.976-8",
-      projectTitle: "Proyecto Graciela - Finalización Aumento Potencia",
-      projectDescription: "Finalización de aumento de potencia, recableado de circuitos (luces y enchufes), revisión del segundo piso y obras civiles asociadas. Todos los valores incluyen materiales.",
-      scope: "El alcance se limita a la instalación de subalimentadores (troncales), separación de circuitos y reparación de fallas críticas. No incluye cambio de cableado en todos los enchufes, excepto en la habitación principal.",
-      recommendation: "Opción B",
-      recommendationReason: "Para dejar líneas matrices de ambos pisos en norma y operativas.",
-      notes: "La renovación total de la casa requiere una cotización nueva.",
+    // Create a new quote with default data
+    const quoteId = await createQuote({
+      clientName: "Nuevo Cliente",
+      clientRut: "",
+      projectTitle: newQuoteName,
+      projectDescription: "Descripción del proyecto...",
+      scope: "Alcance del proyecto...",
+      recommendation: "",
+      recommendationReason: "",
+      notes: "",
     });
 
     setNewQuoteName("");
     setIsCreateDialogOpen(false);
+
+    // Set this as the current quote
+    if (quoteId) {
+      setCurrentQuoteId(quoteId);
+    }
   };
 
   const handleSaveCurrent = async () => {
-    await saveCurrentQuote({
-      clientName: "Sra. Lorena Paris Briones",
-      clientRut: "9.014.976-8",
-      projectTitle: "Proyecto Graciela - Finalización Aumento Potencia",
-      projectDescription: "Finalización de aumento de potencia, recableado de circuitos (luces y enchufes), revisión del segundo piso y obras civiles asociadas. Todos los valores incluyen materiales.",
-      scope: "El alcance se limita a la instalación de subalimentadores (troncales), separación de circuitos y reparación de fallas críticas. No incluye cambio de cableado en todos los enchufes, excepto en la habitación principal.",
-      recommendation: "Opción B",
-      recommendationReason: "Para dejar líneas matrices de ambos pisos en norma y operativas.",
-      notes: "La renovación total de la casa requiere una cotización nueva.",
-    });
+    // Save the complete default quote with all line items
+    const quoteId = await createCompleteQuote({});
+
+    if (quoteId) {
+      setCurrentQuoteId(quoteId);
+    }
+  };
+
+  const handleLoadQuote = (quoteId: string) => {
+    setCurrentQuoteId(quoteId as any);
+    setIsLoadDialogOpen(false);
   };
 
   return (
@@ -87,7 +95,7 @@ export function QuoteManager() {
           Save Current
         </Button>
 
-        <Dialog>
+        <Dialog open={isLoadDialogOpen} onOpenChange={setIsLoadDialogOpen}>
           <DialogTrigger asChild>
             <Button size="sm" variant="outline">
               <FolderOpen className="w-4 h-4 mr-2" />
@@ -98,24 +106,33 @@ export function QuoteManager() {
             <DialogHeader>
               <DialogTitle>Load Quote</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
+            <div className="space-y-4 max-h-96 overflow-y-auto">
               {quotes?.length ? (
                 quotes.map((quote) => (
-                  <Card key={quote._id} className="cursor-pointer hover:bg-accent">
+                  <Card
+                    key={quote._id}
+                    className="cursor-pointer hover:bg-accent transition-colors"
+                    onClick={() => handleLoadQuote(quote._id)}
+                  >
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm">{quote.projectTitle}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <p className="text-xs text-muted-foreground">{quote.clientName}</p>
                       <p className="text-xs text-muted-foreground">
-                        {new Date(quote.createdAt).toLocaleDateString()}
+                        Created: {new Date(quote.createdAt).toLocaleDateString()}
                       </p>
+                      {quote.updatedAt !== quote.createdAt && (
+                        <p className="text-xs text-muted-foreground">
+                          Updated: {new Date(quote.updatedAt).toLocaleDateString()}
+                        </p>
+                      )}
                     </CardContent>
                   </Card>
                 ))
               ) : (
                 <p className="text-sm text-muted-foreground text-center py-4">
-                  No quotes saved yet
+                  No quotes saved yet. Click "Save Current" to save the current quote.
                 </p>
               )}
             </div>
