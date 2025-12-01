@@ -1,9 +1,9 @@
 "use client";
 
-import { useCurrentQuote } from "@/hooks/use-current-quote"
+// import { useCurrentQuote } from "@/hooks/use-current-quote"
 
 export function PartidasTable() {
-  const { currentQuote, isLoading } = useCurrentQuote();
+  // const { currentQuote, isLoading } = useCurrentQuote();
 
   // Default/fallback line items when no quote is loaded
   const defaultPartidas = [
@@ -48,7 +48,7 @@ export function PartidasTable() {
     },
   ];
 
-  const lineItems = currentQuote?.lineItems || defaultPartidas.map((item, index) => ({
+  const lineItems = /* currentQuote?.lineItems || */ defaultPartidas.map((item, index) => ({
     ...item,
     options: item.subItems || [],
     _id: `default-${item.id}`,

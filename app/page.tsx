@@ -7,7 +7,7 @@ import { AnexoSection } from "@/components/anexo-section"
 import { ResumenCobros } from "@/components/resumen-cobros"
 import { DocumentFooter } from "@/components/document-footer"
 import { PrintButton } from "@/components/print-button"
-import { QuoteManager } from "@/components/quote-manager"
+// import { QuoteManager } from "@/components/quote-manager"
 import { Button } from "@/components/ui/button"
 import { Calculator, FileText } from "lucide-react"
 import Link from "next/link"
@@ -32,7 +32,7 @@ export default function ProyectoGraciela() {
       </header>
 
       <PrintButton />
-      <QuoteManager />
+      {/* <QuoteManager /> */}
 
       <main className="max-w-4xl mx-auto">
         {/* Page 1 */}

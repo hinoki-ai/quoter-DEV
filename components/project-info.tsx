@@ -1,13 +1,14 @@
 "use client";
 
 import { User, FileText, AlertCircle, CheckCircle2 } from "lucide-react"
-import { useCurrentQuote } from "@/hooks/use-current-quote"
+// import { useCurrentQuote } from "@/hooks/use-current-quote"
 
 export function ProjectInfo() {
-  const { currentQuote, isLoading } = useCurrentQuote();
+  // const { currentQuote, isLoading } = useCurrentQuote();
 
   // Default/fallback data when no quote is loaded
-  const quote = currentQuote?.quote || {
+  const quote = // currentQuote?.quote ||
+  {
     clientName: "Sra. Lorena Paris Briones",
     clientRut: "9.014.976-8",
     projectTitle: "Proyecto Graciela - Finalización Aumento Potencia",
