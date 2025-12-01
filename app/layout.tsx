@@ -2,11 +2,8 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter, Playfair_Display } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
-import { ConvexProvider, ConvexReactClient } from "convex/react"
-import { QuoteProvider } from "@/hooks/use-current-quote"
+import { Providers } from "@/components/providers"
 import "./globals.css"
-
-const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" })
@@ -25,11 +22,9 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={`${inter.variable} ${playfair.variable} font-sans antialiased`}>
-        <ConvexProvider client={convex}>
-          <QuoteProvider>
-            {children}
-          </QuoteProvider>
-        </ConvexProvider>
+        <Providers>
+          {children}
+        </Providers>
         <Analytics />
       </body>
     </html>
