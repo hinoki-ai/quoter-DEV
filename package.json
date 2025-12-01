@@ -1,5 +1,5 @@
 {
-  "name": "my-v0-project",
+  "name": "presupuestador",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -60,7 +60,8 @@
     "vaul": "^1.1.2",
     "zod": "3.25.76",
     "jspdf": "^2.5.1",
-    "html2canvas": "^1.4.1"
+    "html2canvas": "^1.4.1",
+    "convex": "^1.9.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.9",
